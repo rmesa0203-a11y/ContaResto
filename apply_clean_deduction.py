@@ -1,0 +1,49 @@
+import subprocess
+
+script = """
+const fs = require('fs');
+const esbuild = require('esbuild');
+
+const block = `
+us=(he||t||[]).map(it=>{const rawId=String(it.id||""),cid=rawId.replace(/^(inv_|ing_)/,""),bStock=Number(branchStockMap[\`\${te}_\${rawId}\`]??branchStockMap[\`\${te}_\${cid}\`]??branchStockMap[rawId]??branchStockMap[cid]??it.branchStock?.[te]??it.current_stock??0);return{...it,current_stock:bStock,currentStock:bStock,stock:bStock,branchStock:{...(it.branchStock||{}),[te]:bStock}}});let ws=0;const zn=[],Wr=(k,C)=>{if(k<0||k>=us.length||C<=0)return;const T=us[k],rawId=String(T.id||""),cid=rawId.replace(/^(inv_|ing_)/,""),Be=Number(branchStockMap[\`\${te}_\${rawId}\`]??branchStockMap[\`\${te}_\${cid}\`]??branchStockMap[rawId]??branchStockMap[cid]??T.branchStock?.[te]??T.current_stock??0),Ke=Math.max(0,+(Be-C).toFixed(4)),lt={...(T.branchStock||{}),[te]:Ke},Et=Ke,ie=n9e(T.fifoBatches||[],C,te,T.costPerUnit||0),ke=ie.totalFifoCostCUP;ws+=ke;const Rt={...T,branchStock:lt,currentStock:Ke,stock:Ke,current_stock:Ke,fifoBatches:ie.updatedBatches,totalValue:+(Ke*(T.costPerUnit||0)).toFixed(2),status:Ke<=(T.minStock||0)*.5?"critical":Ke<=(T.minStock||0)?"low":"optimal"};us[k]=Rt,zn.push({id:T.id,newStock:Ke,newBranchStock:Ke,qtyDeducted:C,branchId:te,item:Rt}),branchStockMap[\`\${te}_\${rawId}\`]=Ke,branchStockMap[\`\${te}_\${cid}\`]=Ke,branchStockMap[rawId]=Ke,branchStockMap[cid]=Ke,dN({id:\`kardex-pos-\${Date.now()}-\${Math.random().toString(36).slice(2,6)}\`,timestamp:Date.now(),date:new Date().toISOString().split("T")[0],branchId:te,originType:"venta_pos",referenceDocumentId:va,referenceDocumentNumber:Wt?.tabNumber||va,productId:T.id,productName:T.name,movementType:"salida",quantity:C,unit:T.unit,unitCostFifo:C>0?+(ke/C).toFixed(4):T.costPerUnit,totalValue:+ke.toFixed(2),stockBefore:Be,stockAfter:Ke,operatorName:P.name,details:\`Venta POS: \${ie.consumedBatches.length} lote(s) consumido(s) FIFO\`})},Xn=k=>(k||"").toLowerCase().normalize("NFD").replace(/[\\\\u0300-\\\\u036f]/g,"").trim();Da.forEach(k=>{const C=Xn(k.name);if(k.isPresentation&&k.presentationComponents&&k.presentationComponents.length>0){k.presentationComponents.forEach(ke=>{const Be=ke.quantity*k.quantity,Ke=Xn(ke.itemName);if(ke.itemType==="inventory"){const lt=us.findIndex(Et=>ke.itemId&&Et.id===ke.itemId||Xn(Et.name)===Ke||Ke.length>=3&&(Xn(Et.name).includes(Ke)||Ke.includes(Xn(Et.name))));lt>=0&&Wr(lt,Be)}else if(ke.itemType==="recipe"){const lt=e.find(Et=>ke.itemId&&Et.id===ke.itemId||Xn(Et.name)===Ke);if(lt){const Et=us.findIndex($t=>($t.id===lt.id||Xn($t.name)===Xn(lt.name))&&$t.productType==="elaborated");let Rt=Be;if(Et>=0){const $t=Number(branchStockMap[\`\${te}_\${us[Et].id}\`]??us[Et].branchStock?.[te]??0);if($t>0){const Yt=Math.min(Be,$t);Wr(Et,Yt),Rt=Be-Yt}}if(Rt>0&&lt.ingredients){lt.ingredients.forEach($t=>{const Yt=Xn($t.ingredientName||$t.name),Ma=Yt.split(/\\\\s+/).filter(pa=>pa.length>=3&&!/^\\\\d+g?$/.test(pa)),Ta=us.findIndex(pa=>{if($t.ingredientId&&(pa.id===$t.ingredientId||pa.id===String($t.ingredientId).replace(/^(inv_|ing_)/,"")))return true;const pr=Xn(pa.name);if(pr===Yt||Yt.length>=3&&(pr.includes(Yt)||Yt.includes(pr)))return true;const sr=pr.split(/\\\\s+/).filter(wr=>wr.length>=3&&!/^\\\\d+g?$/.test(wr));return!!Ma.some(wr=>sr.includes(wr))});if(Ta>=0){const pa=us[Ta];let pr=1;const sr=($t.unit||"").toLowerCase(),wr=(pa.unit||"").toLowerCase();(sr==="g"||sr==="ml")&&(wr==="kg"||wr==="l"||wr==="litro"||wr==="litros")?pr=1/1e3:(sr==="kg"||sr==="l"||sr==="litro"||sr==="litros")&&(wr==="g"||wr==="ml")&&(pr=1e3);const Ws=+($t.quantity*Rt*pr).toFixed(4);Wr(Ta,Ws)}})}}});return}const T=(e||[]).find(ke=>k.recipeId&&ke.id===k.recipeId||k.id&&ke.id===k.id||Xn(ke.name)===C),X=us.findIndex(ke=>T&&(ke.recipe_id===T.id||ke.id===T.id)||k.recipeId&&(ke.id===k.recipeId||ke.recipe_id===k.recipeId)||k.id&&ke.id===k.id||ke.is_produced_internally&&(Xn(ke.name)===C||T&&Xn(ke.name)===Xn(T.name)));let remainingQty=Number(k.quantity||1);if(X>=0){const rawId=String(us[X].id||""),cid=rawId.replace(/^(inv_|ing_)/,""),finishedStock=Number(branchStockMap[\`\${te}_\${rawId}\`]??branchStockMap[\`\${te}_\${cid}\`]??branchStockMap[rawId]??branchStockMap[cid]??us[X].branchStock?.[te]??0);if(finishedStock>0){const deductFromFinished=Math.min(remainingQty,finishedStock);Wr(X,deductFromFinished),remainingQty=+(remainingQty-deductFromFinished).toFixed(4)}}if(remainingQty>0&&T&&Array.isArray(T.ingredients)&&T.ingredients.length>0&&!k.isPresentation&&k.category!=="Sellados / Enlatados"){T.ingredients.forEach(Ke=>{const ingName=Xn(Ke.ingredientName||Ke.name||""),rawIngId=String(Ke.ingredientId||Ke.inventoryId||Ke.id||""),cleanIngId=rawIngId.replace(/^(inv_|ing_)/,""),Rt=us.findIndex($t=>{const itemCleanId=String($t.id||"").replace(/^(inv_|ing_)/,"");if(rawIngId&&($t.id===rawIngId||itemCleanId===cleanIngId||$t.recipe_id===rawIngId||$t.recipe_id===cleanIngId))return true;const itemName=Xn($t.name);return itemName===ingName||(ingName.length>=3&&(itemName.includes(ingName)||ingName.includes(itemName)))});if(Rt>=0){const $t=us[Rt];let Yt=1;const Ma=(Ke.unit||"").toLowerCase(),Ta=($t.unit||"").toLowerCase();(Ma==="g"||Ma==="ml")&&(Ta==="kg"||Ta==="l"||Ta==="litro"||Ta==="litros")?Yt=1/1e3:(Ma==="kg"||Ma==="l"||Ma==="litro"||Ma==="litros")&&(Ta==="g"||Ta==="ml")&&(Yt=1e3);const deductAmt=+(Number(Ke.quantity||1)*remainingQty*Yt).toFixed(4);Wr(Rt,deductAmt)}});return}if(remainingQty>0){const ie=X>=0?X:us.findIndex(ke=>k.recipeId&&ke.id===k.recipeId||k.id&&ke.id===k.id||k.itemId&&ke.id===k.itemId||k.sku&&ke.sku&&Xn(ke.sku)===Xn(k.sku)||Xn(ke.name)===C||C.length>=3&&(Xn(ke.name).includes(C)||C.includes(Xn(ke.name))));if(ie>=0){Wr(ie,remainingQty)}}});ws>0&&(ts.costoVentaFifoReal=+ws.toFixed(2),ts.totalCostCUP=+ws.toFixed(2),ts.grossProfitCUP=+(qs-ws).toFixed(2),ts.grossProfitMarginPct=qs>0?+((qs-ws)/qs*100).toFixed(1):0);const Fe=sn||Nt&&qt;Fe&&(x(Zr),Os.enqueue("kitchen_order",Zr,te),Wt?.kitchenOrderIds&&Wt.kitchenOrderIds.length>0&&Wt.kitchenOrderIds.forEach(k=>{if(k!==ea){const C=h.find(T=>T.id===k);if(C){const T={...C,isPaid:!0,status:Nt?C.status:C.status==="lista"?"entregada":C.status,completedAt:!Nt&&C.status==="lista"?C.completedAt||fa:C.completedAt,updatedAt:new Date().toISOString()};x(T),Os.enqueue("kitchen_order",T,te)}}})),N(ts),V(us),window.__BISTRO_OFFLINE_SYNC__?.enqueueSale(ts,te,ye?.tenant_id,zn),typeof window<"u"&&(window.dispatchEvent(new CustomEvent("bistro_sale_completed",{detail:ts})),window.dispatchEvent(new CustomEvent("bistro_elaboration_sale",{detail:ts})));const m=typeof ya=="function"&&ya()?ka():null,v=Da.map(k=>({item_id:k.recipeId,quantity:Number(k.quantity)})).filter(k=>k.item_id&&k.quantity>0);if(m&&v.length>0)try{const{data:k,error:C}=await m.rpc("process_sale_stock_deduction",{p_tenant_id:ye?.tenant_id||"biz-main",p_branch_id:te,p_items:v});(C||!k?.success)&&console.warn("[PosView] process_sale_stock_deduction notice:",C||k?.error)}catch(k){console.warn("[PosView] process_sale_stock_deduction error:",k)}if(zn.forEach(({id:k,newStock:C,newBranchStock:T,branchId:X,item:ie})=>{aa.updateStockOnSale(k,C,ie,X,T).catch(ke=>{console.warn(\`[PosView] Error en mutación remota de stock para \${k}:\`,ke)})}),m&&zn.length>0){const k=ye?.tenant_id||aa.tenantId||"biz-main",C=new Date().toISOString();for(const T of zn)try{const{data:X}=await m.from("branch_inventory").select("id").eq("branch_id",T.branchId).eq("item_id",T.id).maybeSingle();X?.id?await m.from("branch_inventory").update({current_stock:T.newBranchStock,updated_at:C}).eq("id",X.id):await m.from("branch_inventory").insert({tenant_id:k,branch_id:T.branchId,item_id:T.id,current_stock:T.newBranchStock,updated_at:C})}catch(X){console.warn("[PosView] Direct branch_inventory update notice:",X)}}if(window.__BISTRO_LOCAL_STORE__)try{const k=window.__BISTRO_LOCAL_STORE__.getLocalInventory(te);Array.isArray(k)&&k.length>0&&(zn.forEach(C=>{const T=k.find(X=>X.id===C.id||X.item_id===C.id);T&&(T.current_stock=C.newBranchStock,T.stock=C.newBranchStock)}),window.__BISTRO_LOCAL_STORE__.saveLocalInventory(te,k))}catch{}if(zn.length>0){const k={};zn.forEach(C=>{const rawId=String(C.id),cid=rawId.replace(/^(inv_|ing_)/,"");k[\`\${C.branchId}_\${rawId}\`]=C.newBranchStock,k[\`\${C.branchId}_\${cid}\`]=C.newBranchStock,k[rawId]=C.newBranchStock,k[cid]=C.newBranchStock}),setBranchStockMap(prev=>({...prev,...k})),typeof window<"u"&&(window.dispatchEvent(new CustomEvent("bistro_branch_stock_updated",{detail:k})),window.dispatchEvent(new CustomEvent("bistro_catalog_updated",{detail:{branchId:te,count:us.length}})))}
+`;
+
+try {
+  esbuild.transformSync("function wrap() {" + block + "}", { loader: "js" });
+  console.log("ESBUILD_BLOCK_VALID_SUCCESS!");
+} catch (e) {
+  console.error("ESBUILD_BLOCK_ERROR:", e.message);
+  process.exit(1);
+}
+
+let code = fs.readFileSync('assets/index-DCC2oYkl.js', 'utf8');
+const startToken = 'us=(he||t||[]).map(';
+let idxStart = code.indexOf(startToken);
+if (idxStart === -1) {
+  idxStart = code.indexOf('us=[...t];');
+}
+const endToken = 'Os.enqueue("sale",ts,te),Os.enqueue("inventory_update",us,te);';
+const idxEnd = code.indexOf(endToken, idxStart);
+
+if (idxStart === -1 || idxEnd === -1) {
+  console.error("Could not find start or end token in file!", idxStart, idxEnd);
+  process.exit(1);
+}
+
+console.log("Replacing from", idxStart, "to", idxEnd);
+code = code.slice(0, idxStart) + block.trim() + ";" + code.slice(idxEnd);
+fs.writeFileSync('assets/index-DCC2oYkl.js', code, 'utf8');
+
+try {
+  esbuild.transformSync(code, { loader: "js" });
+  console.log("WHOLE_FILE_TRANSFORM_SUCCESS!");
+} catch (e) {
+  console.error("WHOLE_FILE_ERROR:", e.message);
+  process.exit(1);
+}
+"""
+
+with open("apply_clean_deduction.cjs", "w") as f:
+    f.write(script)
+
+print("Saved apply_clean_deduction.cjs")

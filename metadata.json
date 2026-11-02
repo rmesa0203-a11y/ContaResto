@@ -1,0 +1,10 @@
+{
+  "name": "Remix BistroConta - Contabilidad para Cafeterías y Restaurantes",
+  "description": "Sistema especializado de gestión contable, control de Food Cost / CMV, escandallos de recetas, arqueo diario de caja, punto de equilibrio y estado de resultados P\u0026L para gastronomía.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
